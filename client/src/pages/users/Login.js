@@ -6,7 +6,7 @@ import * as Yup from "yup";
 import { loginUserAction } from "../../redux/slices/users/usersSlices";
 import DisabledButton from "../../components/DisableButton";
 import { Link } from "react-router-dom";
-import './css/main.css';
+import '../../App.css';
 
 //form validations
 const formSchema = Yup.object({
