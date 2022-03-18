@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import * as Yup from "yup";
 import { registerUserAction } from "../../redux/slices/users/usersSlices";
 import DisabledButton from "../../components/DisableButton";
- import './css/main.css'
+import '../../App.css';
 //form validations
 const formSchema = Yup.object({
   email: Yup.string().required("Email is required"),
