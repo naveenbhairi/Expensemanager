@@ -4,7 +4,7 @@ import { userProfileAction } from "../../redux/slices/users/usersSlices";
 import LoadingComponent from "../../components/Loading";
 import ErrorDisplayMessage from "../../components/ErrorDisplayMessage";
 import UserProfileContentDetails from "./UserProfileContentdetails";
-import './css/table.css'
+import '../../App.css';
 
 const UserProfileIncList = () => {
   const state = useSelector(state => state.users);
