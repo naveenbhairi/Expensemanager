@@ -85,33 +85,6 @@ Open [http://localhost:3000](http://localhost:3000) and view the application in 
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-# Screenshots of application
-
-### Home page
-![image](https://user-images.githubusercontent.com/59720167/158634706-f3bf56e4-58a4-4dd1-8ff3-9509c18d19c1.png)
-
-### Registration page
-![image](https://user-images.githubusercontent.com/59720167/158742487-e9a5d501-eba3-413d-9395-176b15e5b648.png)
-
-### Login page
-![image](https://user-images.githubusercontent.com/59720167/158667393-89a631ee-d9a6-434e-9894-71cdfd750d87.png)
-
-### User profile page
-![image](https://user-images.githubusercontent.com/59720167/158666797-8b57ad04-d762-4781-9c2d-6904ccb3d4ac.png)
-
-### User Expenses history page
-![image](https://user-images.githubusercontent.com/59720167/158667165-b6061946-5e14-44f8-b7a2-b830e32a6b71.png)
-
-### User Income history page
-![image](https://user-images.githubusercontent.com/59720167/158667231-cd41bcc1-4597-4876-84a2-0d5b73a7b604.png)
-
-### Admin pages
-![image](https://user-images.githubusercontent.com/59720167/158742179-86748b48-a08b-4922-a89c-4229acfa2e87.png)
-
-![image](https://user-images.githubusercontent.com/59720167/158742299-5adf8648-3d64-4d31-8ad2-ce9263a9ccf7.png)
-
-![image](https://user-images.githubusercontent.com/59720167/158742332-5d5d6eff-2b80-46ee-abc7-84ef5da2d613.png)
-
 
 
 
