@@ -1,132 +1,135 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { createExpAction } from "../../redux/slices/expenses/expenseStatSlice"
+import { useHistory } from "react-router-dom";
+import { createExpAction } from "../../redux/slices/expenses/expenseStatSlice";
 import DisabledButton from "../../components/DisableButton";
-import ErrorDisplayMessage from "../../components/ErrorDisplayMessage";
+import "../../App.css";
 
-//form validations
+// Validation
 const formSchema = Yup.object({
-  title: Yup.string().required("title is required"),
-  note: Yup.string().required("note: is required"),
-  amount: Yup.number().required(" Expense Amount is required"),
-  date: Yup.date().required("Date is required"),
+  title: Yup.string().required("Title is required"),
+  amount: Yup.number()
+    .typeError("Amount must be a number")
+    .required("Amount is required")
+    .positive("Amount must be greater than 0"),
+  date: Yup.string().required("Date is required"),
+  note: Yup.string().required("Note is required"),
 });
 
-const AddExpense = props => {
-  const history = useHistory();
-  //dispatch
+const AddExpense = () => {
   const dispatch = useDispatch();
-  //formik form
+  const history = useHistory();
+
+  // Safely check for both singular and plural state names, and grab the correct success flag
+  const expenseState = useSelector((state) => state?.expenses || state?.expense);
+  const { loading, appErr, serverErr, isCreated, isExpCreated } = expenseState || {};
+
   const formik = useFormik({
     initialValues: {
       title: "",
-      note: "",
       amount: "",
       date: "",
-    },
-    onSubmit: values => {
-      dispatch(createExpAction(values));
+      note: "",
+      type: "expense",
     },
     validationSchema: formSchema,
+    onSubmit: (values) => {
+dispatch(createExpAction(values));    },
   });
 
-  //Get expense created from store
-  const state = useSelector(state => state.expenses);
-  const { loading, appErr, serverErr, expenseCreated, isExpCreated } = state;
+  React.useEffect(() => {
+    if (isCreated || isExpCreated) history.push("/profile");
+  }, [isCreated, isExpCreated, history]);
 
-  //Redirect
-  useEffect(() => {
-    if (isExpCreated) history.push("/profile");
-  }, [isExpCreated, dispatch]);
   return (
-    <>
-      <section className="pal" style={{ "background": "#c4d3f6"}}>
-        <div className="container text-center">
-          <div className="row mb-4">
-            <div className="col-12 col-md-8 col-lg-5 mx-auto">
-              <div className="p-4 shadow-sm rounded bg-white">
-                <form onSubmit={formik.handleSubmit}>
-                  <h2 className="mb-4 fw-light">Record New Expense</h2>
-                  {/* Display income Err */}
-                  {serverErr || appErr ? (
-                    <ErrorDisplayMessage>
-                      {serverErr} {appErr}
-                    </ErrorDisplayMessage>
-                  ) : null}
+    <section className="app-container">
+      <div className="form-card">
+        <h2 className="auth-title mb-1">Add Expense</h2>
+        <p className="auth-subtitle mb-3">Record a new expense transaction</p>
+        <div className="auth-divider" />
 
-                  <div className="mb-3 input-group">
-                    <input
-                      value={formik.values.title}
-                      onChange={formik.handleChange("title")}
-                      onBlur={formik.handleBlur("title")}
-                      className="form-control"
-                      type="text"
-                      placeholder="Enter Title"
-                    />
-                  </div>
-                  {/* Err */}
-                  <div className="text-danger mb-2">
-                    {formik.touched.title && formik.errors.title}
-                  </div>
-                  <div className="mb-3 input-group">
-                    <input
-                      value={formik.values.amount}
-                      onChange={formik.handleChange("amount")}
-                      onBlur={formik.handleBlur("amount")}
-                      className="form-control"
-                      type="number"
-                      placeholder="Enter Expense Amount"
-                    />
-                  </div>
-                   {/* Err */}
-                   <div className="text-danger mb-2">
-                    {formik.touched.amount && formik.errors.amount}
-                  </div>
-                  <div className="mb-3 input-group">
-                    <input
-                      value={formik.values.date}
-                      onChange={formik.handleChange("date")}
-                      onBlur={formik.handleBlur("date")}
-                      className="form-control"
-                      type="date"
-                      placeholder="Enter Date"
-                    />
-                  </div>
-                  {/* Err */}
-                  <div className="text-danger mb-2">
-                    {formik.touched.date && formik.errors.date}
-                  </div>
-                  <div className="mb-3 input-group">
-                    <input
-                      value={formik.values.note}
-                      onChange={formik.handleChange("note")}
-                      onBlur={formik.handleBlur("note")}
-                      className="form-control"
-                      type="text"
-                      placeholder="Enter Note"
-                    />
-                  </div>
-                  {/* Err */}
-                  <div className="text-danger mb-2">
-                    {formik.touched.note && formik.errors.note}
-                  </div>
-                  {loading ? (
-                    <DisabledButton />
-                  ) : (
-                    <button type="submit" className="btn btn-warning mb-4 w-100">
-                      Record Expense
-                    </button>
-                  )}
-                </form>
-              </div>
+        {(appErr || serverErr) && (
+          <div className="alert alert-danger" role="alert">
+            {serverErr} {appErr}
+          </div>
+        )}
+
+        <form onSubmit={formik.handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Title</label>
+            <input
+              type="text"
+              name="title"
+              className="form-control"
+              placeholder="e.g. Groceries"
+              value={formik.values.title}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+            <div className="text-danger small mt-1">
+              {formik.touched.title && formik.errors.title}
             </div>
           </div>
-        </div>
-      </section>
-    </>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Amount (Rs.)</label>
+            <input
+              type="number"
+              name="amount"
+              className="form-control"
+              placeholder="e.g. 1200"
+              value={formik.values.amount}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+            <div className="text-danger small mt-1">
+              {formik.touched.amount && formik.errors.amount}
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Date</label>
+            <input
+              type="date"
+              name="date"
+              className="form-control"
+              value={formik.values.date}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+            <div className="text-danger small mt-1">
+              {formik.touched.date && formik.errors.date}
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Note</label>
+            <textarea
+              name="note"
+              rows="1"
+              className="form-control"
+              placeholder="Add short description"
+              value={formik.values.note}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+            <div className="text-danger small mt-1">
+              {formik.touched.note && formik.errors.note}
+            </div>
+          </div>
+
+          {loading ? (
+            <DisabledButton />
+          ) : (
+            <button type="submit" className="btn btn-primary w-100">
+              Add Expense
+            </button>
+          )}
+        </form>
+      </div>
+    </section>
   );
 };
 

@@ -1,123 +1,118 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { userProfileAction } from "../../redux/slices/users/usersSlices";
+import { Link } from "react-router-dom";
 import LoadingComponent from "../../components/Loading";
 import ErrorDisplayMessage from "../../components/ErrorDisplayMessage";
-import UserProfileContentDetails from "./UserProfileContentdetails";
-import '../../App.css';
+import {
+  DeleteIncomeAction,
+} from "../../redux/slices/income/incomeSlices";
+import { userProfileAction } from "../../redux/slices/users/usersSlices";
+import "../../App.css";
 
-const UserProfileIncList = () => {
-  const state = useSelector(state => state.users);
-  const { loading, appErr, serverErr, profile } = state;
-  const [search,setSearch]=useState('')
+const UserProfileIincList = () => {
   const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(userProfileAction());
   }, [dispatch]);
- //delete
- const arr=(e)=>{
-   console.log(e.target.value)
-  setSearch(e.target.value)
-  }
+
+  const incomeState = useSelector((state) => state?.income);
   
-  var evens = profile?.income.filter(item => item.date.substring(5,7)=== search);
-  console.log(evens)
- 
+  const { loading: incLoading, appErr: incAppErr, serverErr: incServerErr } = incomeState || {};
+  const isDeleted = incomeState?.isDeleted || incomeState?.incomeDeleted || incomeState?.isIncDeleted;
+
+  // Get user profile data for user's specific income
+  const userState = useSelector((state) => state?.users);
+  const { profile, loading: userLoading, appErr: userAppErr, serverErr: userServerErr } = userState || {};
+
+  const rows = profile?.income || profile?.incomes || [];
+
+  const loading = incLoading || userLoading;
+  const appErr = incAppErr || userAppErr;
+  const serverErr = incServerErr || userServerErr;
+
+  useEffect(() => {
+    if (isDeleted) {
+      dispatch(userProfileAction());
+    }
+  }, [isDeleted, dispatch]);
+
+  const handleDelete = (id) => {
+    const ok = window.confirm("Are you sure you want to delete this income?");
+    if (ok) dispatch(DeleteIncomeAction(id));
+  };
+
   return (
-    <>
+    <section className="app-container">
       {loading ? (
         <LoadingComponent />
       ) : appErr || serverErr ? (
         <ErrorDisplayMessage>
           {serverErr} {appErr}
         </ErrorDisplayMessage>
-      ) : profile?.income?.length <= 0 ? (
-        <div class="container-table100">
-        <h2>No income Found</h2></div>
       ) : (
-        <div class="pal-5 bg-light">
-          <div className="container-fluid ">
-            <div className="border border-0">
-              <h6 className="kal fs-2 text-secondary ">
-                Recent Income Details
-              </h6>
-              <div className="my-3 dropdown show">
-                <select
-                  className="custom-select btn btn-info dropdown-toggle " style={{"background-color":"white"}}
-                  onChange={arr}
-                >
-                  <option value="01">January</option>
-                  <option value="02">Febuary</option>
-                  <option value="03">March</option>
-                  <option value="04">April</option>
-                  <option value="05">May </option>
-                  <option value="06">June</option>
-                  <option value="07">July</option>
-                  <option value="08">August</option>
-                  <option value="09">September</option>
-                  <option value="10">October</option>
-                  <option value="11">November</option>
-                  <option value="12">December</option>
-                </select>
-              </div>
-              <div className="tt">
-                <table className="table table-striped ">
-                  <thead>
-                    <tr className="table-active">
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Title
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Note
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Amount
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Date
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Edit
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Delete
-                        </strong>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-light">
-                    <>
-                      {evens.length <= 0 ? (
-                        <h4 className="my-3 mm ">No entries Found in this month</h4>
-                      ) : (
-                        evens.map((exp) => (
-                          <UserProfileContentDetails
-                            item={exp}
-                            key={exp?._id}
-                          />
-                        ))
-                      )}
-                    </>
-                  </tbody>
-                </table>
-              </div>
+        <div className="panel">
+          <div className="panel-header">
+            <div>
+              <h2 className="panel-title">My Income History</h2>
+              <p className="panel-subtitle">All your income transactions</p>
             </div>
           </div>
+
+          {rows?.length ? (
+            <div className="table-wrap">
+              <table className="table table-modern">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Note</th>
+                    <th>Type</th>
+                    <th style={{ width: 180 }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((item) => (
+                    <tr key={item._id}>
+                      <td>{item.title}</td>
+                      <td className="text-success fw-bold">Rs. {item.amount}</td>
+                      <td>{item.date ? new Date(item.date).toLocaleDateString() : "-"}</td>
+                      <td>{item.note}</td>
+                      <td>
+                        <span className="badge-income">{item.type || "income"}</span>
+                      </td>
+                      <td>
+                        <div className="row-actions">
+                          <Link 
+                            to={{ pathname: "/edit", state: { item } }} 
+                            className="btn btn-sm btn-outline-primary"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleDelete(item._id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="panel mt-3 text-center">
+              <p className="muted mb-0">No income transactions found.</p>
+            </div>
+          )}
         </div>
       )}
-    </>
+    </section>
   );
 };
 
-export default UserProfileIncList;
+export default UserProfileIincList;

@@ -1,26 +1,41 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import AppPagination from "../../components/AppPagination";
-import ContentDetails from "../../components/ContentDetails";
-import ErrorDisplayMessage from "../../components/ErrorDisplayMessage";
 import LoadingComponent from "../../components/Loading";
-import { fetchAllExpAction } from "../../redux/slices/expenses/expenseStatSlice";
-import { fetchAllIncomeAction } from "../../redux/slices/income/incomeSlices";
+import ErrorDisplayMessage from "../../components/ErrorDisplayMessage";
+import {
+  fetchAllIncomeAction,
+  DeleteIncomeAction,
+} from "../../redux/slices/income/incomeSlices";
+import "../../App.css";
 
 const IncomeList = () => {
   const dispatch = useDispatch();
-  const [page, setPage] = useState(1);
-  //get incomes from store
-  const incomes = useSelector(state => state.income);
-  console.log(incomes)
-  const { loading, appErr, serverErr, incomeList } = incomes;
-  //fetch expenses
+
   useEffect(() => {
-    dispatch(fetchAllIncomeAction(+page));
-  }, [dispatch, page, setPage]);
+    dispatch(fetchAllIncomeAction());
+  }, [dispatch]);
+
+  const incomeState = useSelector((state) => state?.income);
+  const { loading, appErr, serverErr, incomeList } = incomeState || {};
+  const isDeleted = incomeState?.isDeleted || incomeState?.incomeDeleted || incomeState?.isIncDeleted;
+
+  // Robustly extract the array regardless of how the API payload is wrapped (e.g., pagination)
+  const rows = incomeList?.docs || incomeList?.incomes || (Array.isArray(incomeList) ? incomeList : []);
+
+  useEffect(() => {
+    if (isDeleted) {
+      dispatch(fetchAllIncomeAction());
+    }
+  }, [isDeleted, dispatch]);
+
+  const handleDelete = (id) => {
+    const ok = window.confirm("Are you sure you want to delete this income?");
+    if (ok) dispatch(DeleteIncomeAction(id));
+  };
+
   return (
-    <>
+    <section className="app-container">
       {loading ? (
         <LoadingComponent />
       ) : appErr || serverErr ? (
@@ -28,81 +43,77 @@ const IncomeList = () => {
           {serverErr} {appErr}
         </ErrorDisplayMessage>
       ) : (
-        <div className="pal-3 bg-light">
-          <div className="container-fluid ">
-            <div className="border border-0">
-              <h6 className="kal  fs-2 text-secondary ">
-                Recent Income transactions
-              </h6>
-              <div className="tt">
-                <table className="table table-striped ">
-                  <thead>
-                    <tr>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Username
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Title
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Note
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Amount
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Date
-                        </strong>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <h1>Loading...</h1>
-                    ) : appErr || serverErr ? (
-                      <div>err</div>
-                    ) : incomeList?.docs?.length <= 0 ? (
-                      <h4 className="m-5" style={{ "font-size": "25px" }}>
-                        No Income Found
-                      </h4>
-                    ) : (
-                      incomeList?.docs?.map((exp) => (
-                        <>
-                          <ContentDetails key={exp?._id} item={exp} />
-                        </>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+        <div className="panel">
+          <div className="panel-header">
+            <div>
+              <h2 className="panel-title">Income Transactions</h2>
+              <p className="panel-subtitle">View and manage all income records</p>
             </div>
           </div>
-          <div
-            className="pl"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "20px",
-            }}
-          >
-            <AppPagination
-              setPage={setPage}
-              pageNumber={incomeList?.totalPages}
-            />
-          </div>
+
+          {rows?.length ? (
+            <div className="table-wrap">
+              <table className="table table-modern">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Note</th>
+                    <th>Type</th>
+                    <th style={{ width: "180px" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((item) => (
+                    <tr key={item._id}>
+                      <td className="text-capitalize fw-bold">{item?.user?.firstname} {item?.user?.lastname}</td>
+                      <td>{item.title}</td>
+                      <td className="text-success fw-bold">Rs. {item.amount}</td>
+                      <td>{item.date ? new Date(item.date).toLocaleDateString() : "-"}</td>
+                      <td>{item.note}</td>
+                      <td>
+                        <span className="badge-income">{item.type || "income"}</span>
+                      </td>
+                      <td>
+                        <div className="row-actions">
+                          <Link 
+                            to={{ pathname: "/edit", state: { item: { ...item, type: item?.type || "income" } } }} 
+                            className="btn btn-sm btn-outline-primary"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleDelete(item._id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan="2" style={{ textAlign: "right", fontWeight: "bold" }}>Total:</td>
+                    <td className="text-success fw-bold" style={{ fontSize: "1.05rem" }}>Rs. {rows.reduce((acc, item) => acc + Number(item.amount), 0)}</td>
+                    <td colSpan="4"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          ) : (
+            <div className="panel mt-3 text-center">
+              <p className="muted mb-0">No income transactions found.</p>
+            </div>
+          )}
         </div>
+        
       )}
-    </>
+    </section>
   );
 };
 

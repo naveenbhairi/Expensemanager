@@ -20,34 +20,26 @@ import UserProfileIncList from "./pages/users/UserProfileIincList";
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <AdminRoute exact path="/expenses" component={ExpensesList} />
-        <AdminRoute exact path="/incomes" component={IncomeList} />
-        <ProtectedRoute exact path="/edit" component={EditContent} />
-        <ProtectedRoute
-          exact
-          path="/update-profile"
-          component={UpdateProfile}
-        />
-        <ProtectedRoute
-          exact
-          path="/user-expenses"
-          component={UserProfileExpList}
-        />
-        <ProtectedRoute
-          exact
-          path="/user-income"
-          component={UserProfileIncList}
-        />
-        <AdminRoute exact path="/dashboard" component={DashboardData} />
-        <ProtectedRoute exact path="/add-income" component={AddIncome} />
-        <ProtectedRoute exact path="/add-expense" component={AddExpense} />
-        <ProtectedRoute exact path="/profile" component={Profile} />
-        <Route exact path="/login" component={Login} />
-        <Route exact path="/register" component={Register} />
-      </Switch>
+      <div className="app-shell">
+        <Navbar />
+        <main className="app-content app-container">
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <AdminRoute exact path="/expenses" component={ExpensesList} />
+            <AdminRoute exact path="/incomes" component={IncomeList} />
+            <ProtectedRoute exact path="/edit" component={EditContent} />
+            <ProtectedRoute exact path="/update-profile" component={UpdateProfile} />
+            <ProtectedRoute exact path="/user-expenses" component={UserProfileExpList} />
+            <ProtectedRoute exact path="/user-income" component={UserProfileIncList} />
+            <AdminRoute exact path="/dashboard" component={DashboardData} />
+            <ProtectedRoute exact path="/add-income" component={AddIncome} />
+            <ProtectedRoute exact path="/add-expense" component={AddExpense} />
+            <ProtectedRoute exact path="/profile" component={Profile} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/register" component={Register} />
+          </Switch>
+        </main>
+      </div>
     </BrowserRouter>
   );
 }

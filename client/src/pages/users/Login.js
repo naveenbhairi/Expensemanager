@@ -1,138 +1,114 @@
 import React, { useEffect } from "react";
 import { useFormik } from "formik";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
 import { loginUserAction } from "../../redux/slices/users/usersSlices";
 import DisabledButton from "../../components/DisableButton";
-import { Link } from "react-router-dom";
-import '../../App.css';
 
-//form validations
+// Form validations
 const formSchema = Yup.object({
   email: Yup.string().required("Email is required"),
   password: Yup.string().required("Password is required"),
 });
 
 const Login = () => {
-  //history
   const history = useHistory();
-
-  //dispatch
   const dispatch = useDispatch();
-  //get data from store
 
-  const user = useSelector(state => state?.users);
+  const user = useSelector((state) => state?.users);
   const { userAppErr, userServerErr, userLoading, userAuth } = user;
 
-  //formik form
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
-    onSubmit: values => {
+    onSubmit: (values) => {
       dispatch(loginUserAction(values));
     },
     validationSchema: formSchema,
   });
 
-  // Redirect 
+  // Redirect
   useEffect(() => {
-  
     if (userAuth) {
-      {userAuth?.isAdmin?
-      history.push("/dashboard"):history.push("/profile")}
+      userAuth?.isAdmin ? history.push("/dashboard") : history.push("/profile");
     }
-  }, [userAuth]);
+  }, [userAuth, history]);
 
   return (
-    <>
-  <section >
-    <div className="limiter" >
-		<div className="container-login100" >
-			<div className="wrap-login100 ">
-				<div className="login100-pic js-tilt" data-tilt>
-        <span className="login100-form-title">
-        <h2 className="display-5 fw-bold mt-5 text-dark">
-                Keep Track of your income and expenses flow
-              </h2>
-				</span>
-				</div>
+    <section className="app-container auth-page-bg">
+      <div className="auth-card" style={{ maxWidth: "460px", margin: "0 auto" }}>
+        <div className="text-center">
+          <h2 className="auth-title">Welcome Back</h2>
+          <p className="auth-subtitle">Login to your account to continue</p>
+        </div>
         
-				<form className="login100-form validate-form" onSubmit={formik.handleSubmit}>
-        <p className="mx-5">
-        {userAppErr || userServerErr ? (
-                <div class="alert alert-danger" role="alert">
-                  {userServerErr} {userAppErr}
-                </div>
-              ) : null}
-          </p>
-					<span className="login100-title mt-5">
-						User Login
-					</span>
-        
-					<div className="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
-						<input
-             value={formik.values.email}
-             onChange={formik.handleChange("email")}
-             onBlur={formik.handleBlur("email")}
-             className="input100"
-              type="text"
-               name="email"
-                placeholder="Email"/>
-						<span className="focus-input100"></span>
-						<span className="symbol-input100">
-							<i className="fa fa-envelope" aria-hidden="true"></i>
-						</span>
-            <div className="text-danger mb-2">
-                  {formik.touched.email && formik.errors.email}
-                </div>
+        <div className="auth-divider" />
 
-					</div>
+        {/* Error Message */}
+        {(userAppErr || userServerErr) && (
+          <div className="alert alert-danger p-3 mb-4 rounded-3" role="alert" style={{ fontSize: "0.95rem" }}>
+            {userServerErr} {userAppErr}
+          </div>
+        )}
 
-					<div className="wrap-input100 validate-input" data-validate = "Password is required">
-						<input 
-                 value={formik.values.password}
-                 onChange={formik.handleChange("password")}
-                 onBlur={formik.handleBlur("password")}
-            className="input100"
-             type="password"
-              name="pass"
-               placeholder="Password"/>
-						<span className="focus-input100"></span>
-						<span className="symbol-input100">
-							<i className="fa fa-lock" aria-hidden="true"></i>
-						</span>
-            <div className="text-danger mb-2">
-                  {formik.touched.password && formik.errors.password}
-                </div>
-					</div>
-					
-					
-          {userLoading ? (
-                    <DisabledButton />
-                  ) : (
-                    <div className="container-login100-form-btn">
-                    <button
-                      type="submit"
-                      className="login100-form-btn"
-                    >
-                      Login
-                    </button>	</div>
-                  )}
-                  <div className="mt-2" style={{"font-size":"17px"}}>Don't have an acount?
-                  <Link to="/register" className="text-decoration-none"style={{"color":"green"}}>
-                   <small>Create account</small> 
-                  </Link>
-					        </div>
-					</form>
-              
-			</div>
-		</div>
-	</div>
-  </section>
-    </>
+        <form onSubmit={formik.handleSubmit}>
+          {/* Email Input */}
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Email Address</label>
+            <input
+              value={formik.values.email}
+              onChange={formik.handleChange("email")}
+              onBlur={formik.handleBlur("email")}
+              className="form-control"
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+            />
+            <div className="text-danger mt-1 small">
+              {formik.touched.email && formik.errors.email}
+            </div>
+          </div>
+
+          {/* Password Input */}
+          <div className="mb-4">
+            <label className="form-label fw-semibold">Password</label>
+            <input
+              value={formik.values.password}
+              onChange={formik.handleChange("password")}
+              onBlur={formik.handleBlur("password")}
+              className="form-control"
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+            />
+            <div className="text-danger mt-1 small">
+              {formik.touched.password && formik.errors.password}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="d-grid mt-4">
+            {userLoading ? (
+              <div className="text-center"><DisabledButton /></div>
+            ) : (
+              <button type="submit" className="btn btn-primary w-100 py-2">
+                Login
+              </button>
+            )}
+          </div>
+
+          <div className="text-center mt-4 muted" style={{ fontSize: "0.95rem" }}>
+            Don't have an account?{" "}
+            <Link to="/register" className="auth-link">
+              Create account
+            </Link>
+          </div>
+        </form>
+      </div>
+    </section>
   );
 };
 

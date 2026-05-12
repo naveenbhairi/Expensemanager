@@ -3,15 +3,25 @@ import { useDispatch, useSelector } from "react-redux";
 import LoadingComponent from "../../components/Loading";
 import ErrorDisplayMessage from "../../components/ErrorDisplayMessage";
 import { fetchAccountStatsAction } from "../../redux/slices/accountsStats/accountStatSlices";
-import '../../App.css'
+import "../../App.css";
+
 const DashboardData = () => {
   const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(fetchAccountStatsAction());
   }, [dispatch]);
 
-  const account = useSelector(state => state.account);
+  const account = useSelector((state) => state.account);
   const { loading, accountDetails, appErr, serverErr } = account;
+
+  const totalIncome = accountDetails?.incomeStats?.[0]?.totalIncome || 0;
+  const totalIncomeTx = accountDetails?.incomeStats?.[0]?.totalRecordsIncome || 0;
+
+  const totalExpense = accountDetails?.expenseStats?.[0]?.totalExp || 0;
+  const totalExpenseTx = accountDetails?.expenseStats?.[0]?.totalRecordsExp || 0;
+
+  const balance = totalIncome - totalExpense;
 
   return (
     <>
@@ -22,28 +32,44 @@ const DashboardData = () => {
           {serverErr} {appErr}
         </ErrorDisplayMessage>
       ) : (
-        <div class="pal-4">
-          <div class="container">
-            <div class="container-1 ">
-              <div class="card-2" >
-                <div class="content-1">
-                  <div class="contentBx mb-2">
-                    <h3>Total Income</h3>
-                  </div>
-                  <div class="ll">Rs.{accountDetails?.expenseStats[0]?.totalExp}</div>
-                  <div class="ll-1">Total Transactions    {accountDetails?.expenseStats[0]?.totalRecordsExp}</div>
-                </div>
-                
+        <div className="app-container">
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <h2 className="panel-title">Dashboard Overview</h2>
+                <p className="panel-subtitle">Your account summary at a glance</p>
               </div>
-              <div></div>
-              <div class="card-2">
-                <div class="content-1">
-                  <div class="contentBx mb-2">
-                    <h3>Total Expenses</h3>
-                  </div>
-                  <div class="ll">Rs.{accountDetails?.incomeStats[0]?.totalIncome}</div>
-                  <div class="ll-1">Total Transactions {accountDetails?.incomeStats[0]?.totalRecordsIncome}</div>
+            </div>
+
+            <div className="grid-3">
+              {/* Balance */}
+              <div className="stat-card">
+                <div className="stat-top">
+                  <p className="stat-title">Current Balance</p>
+                  <span className="stat-icon balance">BL</span>
                 </div>
+                <h3 className="stat-value">Rs. {balance}</h3>
+                <p className="muted mb-0">Income - Expense</p>
+              </div>
+
+              {/* Income */}
+              <div className="stat-card">
+                <div className="stat-top">
+                  <p className="stat-title">Total Income</p>
+                  <span className="stat-icon income">IN</span>
+                </div>
+                <h3 className="stat-value">Rs. {totalIncome}</h3>
+                <p className="muted mb-0">Total Transactions: {totalIncomeTx}</p>
+              </div>
+
+              {/* Expense */}
+              <div className="stat-card">
+                <div className="stat-top">
+                  <p className="stat-title">Total Expenses</p>
+                  <span className="stat-icon expense">EX</span>
+                </div>
+                <h3 className="stat-value">Rs. {totalExpense}</h3>
+                <p className="muted mb-0">Total Transactions: {totalExpenseTx}</p>
               </div>
             </div>
           </div>

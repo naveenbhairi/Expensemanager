@@ -1,24 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import AppPagination from "../../components/AppPagination";
-import ContentDetails from "../../components/ContentDetails";
-import ErrorDisplayMessage from "../../components/ErrorDisplayMessage";
 import LoadingComponent from "../../components/Loading";
-import { fetchAllExpAction } from "../../redux/slices/expenses/expenseStatSlice";
-import '../../App.css';
-const ExpensesList = () => {
+import ErrorDisplayMessage from "../../components/ErrorDisplayMessage";
+import {
+  fetchAllExpAction,
+  deleteExpAction,
+} from "../../redux/slices/expenses/expenseStatSlice";
+import "../../App.css";
+
+const ExpenseList = () => {
   const dispatch = useDispatch();
-  const [page, setPage] = useState(1);
-  //get expenses from store
-  const expenses = useSelector(state => state.expenses);
-  const { loading, appErr, serverErr, expenseList } = expenses;
-  //fetch expenses
+
+  useEffect(() => {dispatch(fetchAllExpAction());
+    
+  }, [dispatch]);
+
+  // Safely check for both singular and plural state names
+  const expenseState = useSelector((state) => state?.expenses || state?.expense);
+  const { loading, appErr, serverErr, expenseList } = expenseState || {};
+  
+  const isDeleted = expenseState?.isDeleted || expenseState?.isExpdeleted || expenseState?.isExpDeleted;
+
+  // Safely extract the array regardless of how the API payload is wrapped
+  const rows = expenseList?.docs || expenseList?.expenses || (Array.isArray(expenseList) ? expenseList : []);
+
   useEffect(() => {
-    dispatch(fetchAllExpAction(+page));
-  }, [dispatch, page, setPage]);
+    if (isDeleted) {
+      dispatch(fetchAllExpAction());
+    }
+  }, [isDeleted, dispatch]);
+
+  const handleDelete = (id) => {
+    const ok = window.confirm("Are you sure you want to delete this expense?");
+    if (ok) dispatch(deleteExpAction(id));  
+  };
+
   return (
-    <>
+    <section className="app-container">
       {loading ? (
         <LoadingComponent />
       ) : appErr || serverErr ? (
@@ -26,81 +45,78 @@ const ExpensesList = () => {
           {serverErr} {appErr}
         </ErrorDisplayMessage>
       ) : (
-        <div className="pal-3 bg-light" >
-          <div className="container-fluid " >
-            <div className="border border-0">
-                <h6 className="kal fs-2 text-secondary ">
-                  Recent Expense transactions
-                </h6>
-              <div className="tt">
-                <table className="table table-striped " >
-                  <thead>
-                    <tr>
-                      <th scope="col" >
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Username
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Title
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Note
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Amount
-                        </strong>
-                      </th>
-                      <th scope="col">
-                        <strong className="btn  text-uppercase fw-bold text-light">
-                          Date
-                        </strong>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody >
-                    {loading ? (
-                      <h1>Loading...</h1>
-                    ) : appErr || serverErr ? (
-                      <div>err</div>
-                    ) : expenseList?.docs?.length <= 0 ? (
-                      <h4 className="m-5" style={{ "font-size": "25px" }}>
-                        No Expense Found
-                      </h4>
-                    ) : (
-                      expenseList?.docs?.map((exp) => (
-                        <>
-                          <ContentDetails key={exp?._id} item={exp} />
-                        </>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+        
+        <div className="panel">
+          <div className="panel-header">
+            <div>
+              <h2 className="panel-title">Expense Transactions</h2>
+              <p className="panel-subtitle">View and manage all expense records</p>
             </div>
           </div>
-          <div className="pl"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "20px",
-            }}
-          >
-            <AppPagination
-              setPage={setPage}
-              pageNumber={expenseList?.totalPages}
-            />
-          </div>
+
+          {rows?.length ? (
+            <div className="table-wrap">
+              <table className="table table-modern">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Note</th>
+                    <th>Type</th>
+                    <th style={{ width: "180px" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((item) => (
+                    <tr key={item._id}>
+                      <td className="text-capitalize fw-bold">{item?.user?.firstname} {item?.user?.lastname}</td>
+                      <td>{item.title}</td>
+                      <td className="text-danger fw-bold">Rs. {item.amount}</td>
+                      <td>{item.date ? new Date(item.date).toLocaleDateString() : "-"}</td>
+                      <td>{item.note}</td>
+                      <td>
+                        <span className="badge-expense">{item.type || "expense"}</span>
+                      </td>
+                      <td>
+                        <div className="row-actions">
+                          <Link 
+                            to={{ pathname: "/edit", state: { item: { ...item, type: item?.type || "expense" } } }} 
+                            className="btn btn-sm btn-outline-primary"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleDelete(item._id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan="2" style={{ textAlign: "right", fontWeight: "bold" }}>Total:</td>
+                    <td className="text-danger fw-bold" style={{ fontSize: "1.05rem" }}>Rs. {rows.reduce((acc, item) => acc + Number(item.amount), 0)}</td>
+                    <td colSpan="4"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          ) : (
+            <div className="panel mt-3 text-center">
+              <p className="muted mb-0">No expense transactions found.</p>
+            </div>
+          )}
         </div>
       )}
-    </>
+    </section>
   );
 };
 
-export default ExpensesList;
+export default ExpenseList;

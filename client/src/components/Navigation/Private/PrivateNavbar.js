@@ -9,90 +9,40 @@ const PrivateNavbar = () => {
   const userLogin = useSelector(state => state?.users?.userAuth);
 
   return (
-    <>
-      <nav
-        class="navbar navbar-expand-md navbar-dark  fixed-top p-1"
-        style={{ "background-color": "#5e5d96"}}
-      >
-        <Link to="/" className="navbar-brand">
-          <img className="image-fluid mx-5" src={ex} width="120" height="50" />
-        </Link>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
+    <nav className="navbar-glass-dark">
+      {/* Brand / Logo */}
+      <Link to="/" className="nav-brand nav-brand-dark">
+        <img style={{ height: "36px", width: "auto" }} src={ex} alt="Expense Manager" />
+        <span>
+          Expense<span>Manager</span>
+        </span>
+      </Link>
+
+      {/* Desktop Nav Links & Auth Buttons */}
+      <div className="nav-menu">
+        {userLogin?.isAdmin ? (
+          <>
+            <Link to="/dashboard" className="nav-link-item nav-link-item-dark">Dashboard</Link>
+            <Link to="/expenses" className="nav-link-item nav-link-item-dark">Expenses</Link>
+            <Link to="/incomes" className="nav-link-item nav-link-item-dark">Income</Link>
+          </>
+        ) : (
+          <>
+            <Link to="/profile" className="nav-link-item nav-link-item-dark">Profile</Link>
+            <Link to="/add-expense" className="nav-link-item nav-link-item-dark">Add Expense</Link>
+            <Link to="/add-income" className="nav-link-item nav-link-item-dark">Add Income</Link>
+          </>
+        )}
+        
+        <button 
+          onClick={() => dispatch(logout())}
+          className="nav-link-item nav-link-item-dark"
+          style={{ background: "transparent", border: "none", cursor: "pointer" }}
         >
-          <span class="navbar-toggler-icon"></span>
+          Logout
         </button>
-        <div
-          class="collapse navbar-collapse justify-content-between"
-          id="navbarSupportedContent"
-        >
-          <ul class="navbar-nav ">
-            <li class="nav-item">
-              {userLogin?.isAdmin ? 
-                <Link
-                  to="/expenses"
-                  className="nav-link active text-light me-4"
-                >
-                  Expenses List
-                </Link>
-               : null}
-            </li>
-
-            <li class="nav-item ">
-              {userLogin?.isAdmin ? 
-                <Link to="/incomes" className="nav-link active text-light me-4">
-                  Income List
-                </Link>
-              : null}
-            </li>
-
-            <li class="nav-item ">
-              {userLogin?.isAdmin ? 
-                <Link
-                  to="/dashboard"
-                  className="nav-link active text-light me-4"
-                >
-                  Dashboard
-                </Link>
-               : null}
-            </li>
-            </ul>
-            <form class="form-inline d-flex al" style={{"text-align":"center"}}>
-            {userLogin?.isAdmin ? null:
-              <Link 
-                to="/profile" 
-                className="text-light text-decoration-none al-1"
-                style={{ "margin-right": "2em" }}
-                >
-                Profile
-              </Link>
-             }
-            {userLogin?.isAdmin ? null:
-              <Link
-                to="/add-income"
-                className="text-light text-decoration-none al-2" 
-                style={{ "margin-right": "2em" }}
-              >
-                Add Transaction
-              </Link>
-            }
-            <Link
-                onClick={() => dispatch(logout())}
-                className="text-light text-decoration-none"
-                style={{ "margin-right": "5em" }}
-              >
-                Logout
-              </Link>
-          </form>
-              
-              
-        </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 };
 

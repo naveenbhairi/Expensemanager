@@ -42,70 +42,76 @@ const EditContent = ({
   const { appErr, serverErr, expenseUpdated, loading } = expenseData;
 
   return (
-    <section className="pal-6 bg-secondary ">
-      <div className="container text-center">
-        <div className="row mb-4">
-          <div className="col-12 col-md-8 col-lg-5 mx-auto">
-            <div className="p-4 shadow-sm rounded bg-white">
-              <form onSubmit={formik.handleSubmit}>
-                {/* Display Err */}
-                {appErr || serverErr ? <div>Err</div> : null}
-                {item?.type === "income" ? (
-                  <h2>Update Income</h2>
-                ) : (
-                  <h2>Update Expense</h2>
-                )}
-                
-                <div className="mb-4 mt-4 input-group">
-                  <input
-                    value={formik.values.title}
-                    onChange={formik.handleChange("title")}
-                    onBlur={formik.handleBlur("title")}
-                    className="form-control"
-                    type="text"
-                    placeholder="Enter Title"
-                  />
-                </div>
-                <div className="mb-4 input-group">
-                  <input
-                    value={formik.values.note}
-                    onChange={formik.handleChange("note")}
-                    onBlur={formik.handleBlur("note")}
-                    className="form-control"
-                    type="text"
-                    placeholder="Enternote"
-                  />
-                </div>
-                <div className="mb-4 input-group">
-                  <input
-                    value={formik.values.amount}
-                    onChange={formik.handleChange("amount")}
-                    onBlur={formik.handleBlur("amount")}
-                    className="form-control"
-                    type="number"
-                    placeholder="Enter Amount"
-                  />
-                </div>
-                <div className="mb-4 input-group">
-                <input
-                  value={formik.values.date}
-                  onChange={formik.handleChange("date")}
-                  onBlur={formik.handleBlur("date")}
-                  className="form-control"
-                  type="date"
-                />
-              </div>
-                {loading ? (
-                  <DisabledButton /> 
-                ) : ( 
-                  <button type="submit" className="btn btn-primary w-100"> 
-                  update 
-                  </button> 
-                )}
-              </form>
-            </div>
+    <section className="app-container">
+      <div className="form-card">
+        <h2 className="auth-title mb-1">
+          {item?.type === "income" ? "Update Income" : "Update Expense"}
+        </h2>
+        <p className="auth-subtitle mb-3">Update your transaction details</p>
+        <div className="auth-divider" />
+
+        {(appErr || serverErr) && (
+          <div className="alert alert-danger" role="alert">
+            {serverErr} {appErr}
           </div>
-        </div>
+        )}
+
+        <form onSubmit={formik.handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Title</label>
+            <input
+              value={formik.values.title}
+              onChange={formik.handleChange("title")}
+              onBlur={formik.handleBlur("title")}
+              className="form-control"
+              type="text"
+              placeholder="Enter Title"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Note</label>
+            <input
+              value={formik.values.note}
+              onChange={formik.handleChange("note")}
+              onBlur={formik.handleBlur("note")}
+              className="form-control"
+              type="text"
+              placeholder="Enter note"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Amount (Rs.)</label>
+            <input
+              value={formik.values.amount}
+              onChange={formik.handleChange("amount")}
+              onBlur={formik.handleBlur("amount")}
+              className="form-control"
+              type="number"
+              placeholder="Enter Amount"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Date</label>
+            <input
+              value={formik.values.date}
+              onChange={formik.handleChange("date")}
+              onBlur={formik.handleBlur("date")}
+              className="form-control"
+              type="date"
+            />
+          </div>
+
+          {loading ? (
+            <DisabledButton />
+          ) : (
+            <button type="submit" className="btn btn-primary w-100 mt-2">
+              Update
+            </button>
+          )}
+        </form>
       </div>
     </section>
   );

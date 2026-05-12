@@ -20,7 +20,7 @@ function LoadingComponent() {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        backgroundColor: "white",
+        backgroundColor: "transparent",
       }}
     >
       <ClipLoader color={color} loading={loading} css={override} size={150} />
